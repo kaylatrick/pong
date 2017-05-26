@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Pong</title>
+    <style media="screen">
+      canvas {
+        border: solid black 4px;
+      }
+      div {
+        display: inline-block;
+        padding: 10px;
+      }
+      .win {
+        font-size: 30px;
+        color: red;
+        text-indent: 25px;
+        text-transform: capitalize;
+      }
+    </style>
+  </head>
+  <body id="body">
+      <div id="Player_1">
+          <h2>Player 1 Score</h2>
+          <p id="Player_1_Score">0</p>
+      </div>
+      <div id="Player_2">
+        <h2>Player 2 Score</h2>
+        <p id="Player_2_Score">0</p>
+      </div>
+    <br>
+    <canvas id="canvas"></canvas>
+      <br>
+    <div id="win_container" class="win"></div>
+    <br>
+
+
+    <script>
+    //canvas
+      var canvas = document.getElementById('canvas');
+      var ctx = canvas.getContext('2d');
+      var b = document.getElementById('body');
+      var p1 = document.getElementById('Player_1_Score');
+      var p2 = document.getElementById('Player_2_Score');
+      var winContainer = document.getElementById('win_container');
+      canvas.width = 1000;
+      canvas.height = 800;
+
+    //move ball
+      var x = 300;
+      var y = 300;
+      var yBottom = 0;
+      var xRight = 0;
+
+      var leftPaddlePositionX = 50;
+      var leftPaddlePositionY = 350;
+      var leftPaddleWidth = 25;
+      var leftPaddleHeight = 150;
+
+      var rightPaddlePositionX = 900;
+      var rightPaddlePositionY = 350;
+      var rightPaddleWidth = 25;
+      var rightPaddleHeight = 150;
+
+      var leftPaddleRightX; //75
+      var leftPaddleTopY; //350
+      var leftPaddleBottomY; //500
+      var leftPaddleLeftX; //50
+
+      var rightPaddleRightX; //925
+      var rightPaddleTopY; //350
+      var rightPaddleBottomY; //500
+      var rightPaddleLeftX; //900
+
+      //move right paddle up/down
+      b.addEventListener('keydown', function(evt) {
+        if (evt.keyCode === 38) { /*up*/
+          rightPaddlePositionY-=10;
+        }
+      })
+
+      b.addEventListener('keydown', function(evt) {
+        if (evt.keyCode === 40) { /*up*/
+          rightPaddlePositionY+=10;
+        }
+      })
+
+      //move left paddle up/down (a&z)
+      b.addEventListener('keydown', function(evt) {
+        if (evt.keyCode === 65) { /*up*/
+          leftPaddlePositionY-=10;
+        }
+      })
+
+      b.addEventListener('keydown', function(evt) {
+        if (evt.keyCode === 90) { /*up*/
+          leftPaddlePositionY+=10;
+        }
+      })
+
+      var p1Score = 0;
+      var p2Score = 0;
+
+      function draw(dt) {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+
+        ctx.beginPath();
+        ctx.arc(x,y,10,0,2*Math.PI);
+        ctx.fillStyle = 'red';
+        ctx.fill();
+
+        leftPaddleRightX = (leftPaddlePositionX+leftPaddleWidth); //75
+        leftPaddleTopY = leftPaddlePositionY; //350
+        leftPaddleBottomY = (leftPaddlePositionY+leftPaddleHeight); //500
+        leftPaddleLeftX = leftPaddlePositionX; //50
+
+        rightPaddleRightX = (rightPaddlePositionX+rightPaddleWidth); //925
+        rightPaddleTopY = rightPaddlePositionY; //350
+        rightPaddleBottomY = (rightPaddlePositionY+rightPaddleHeight); //500
+        rightPaddleLeftX = rightPaddlePositionX; //900
+
+
+        //assigning variables for borders
+        if(
+          // (xRight === 0 && x >= leftPaddleLeftX && x <= leftPaddleRightX && y <= leftPaddleBottomY && y >= leftPaddleTopY) ||
+          (x >= rightPaddleLeftX && y <= rightPaddleBottomY && y >= rightPaddleTopY)
+        ) {
+          xRight = 1;
+        }
+        if(
+        (x <= leftPaddleRightX && y <= leftPaddleBottomY && y >= leftPaddleTopY)
+        // (xRight === 1 && x <= rightPaddleRightX && x >= rightPaddleLeftX && y <= rightPaddleBottomY && y >= rightPaddleTopY)
+        ) {
+          xRight = 0;
+        }
+        if(x >= canvas.width) {
+          p1Score ++;
+          p1.innerHTML = p1Score;
+          x=500;
+          y=500;
+        }
+
+        if(x <= 0) {
+          p2Score++;
+          p2.innerHTML = p2Score;
+          x=500;
+          y=500;
+        }
+
+        if(y >= canvas.height) {
+          yBottom = 1;
+        }
+        if(y <= 0)
+        {
+          yBottom = 0;
+        }
+
+        //adding/subtracting x/y for border bounce
+        var direction = '';
+
+        if(xRight === 1) {
+          x-=5;
+          direction = "left";
+        }
+        if(yBottom === 1) {
+          y-=5;
+          direction = "up";
+        }
+        if(xRight === 0) {
+          x+=5;
+          direction = "right";
+        }
+        if(yBottom === 0) {
+          y+=5;
+          direction = "down";
+        }
+
+        // paddles
+        ctx.fillStyle = 'black';
+        ctx.fillRect(leftPaddlePositionX,leftPaddlePositionY,leftPaddleWidth,leftPaddleHeight);
+
+        ctx.fillStyle = 'black';
+        ctx.fillRect(rightPaddlePositionX,rightPaddlePositionY,rightPaddleWidth,rightPaddleHeight);
+
+
+
+        if(p1Score === 5) {
+          winContainer.innerHTML = "PLAYER 2 WINS!";
+          window.cancelAnimationFrame(draw);
+        } else if(p2Score === 5) {
+          winContainer.innerHTML = "PLAYER 1 WINS!";
+          window.cancelAnimationFrame(draw);
+        } else {
+          window.requestAnimationFrame(draw);
+        }
+      }
+
+      window.requestAnimationFrame(draw);
+
+    </script>
+  </body>
+</html>
